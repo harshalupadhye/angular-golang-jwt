@@ -1,0 +1,15 @@
+/* You can add global styles to this file, and also import other style files */
+body {
+    display: flex !important;
+    margin: 0px !important;
+    flex-direction: column !important;
+    font-family: sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    color: #4E555D;
+    ::-webkit-scrollbar {
+      width: 10px !important;
+    }
+  }
+/* Importing Bootstrap SCSS file. */
+@import '~bootstrap/scss/bootstrap';

@@ -1,0 +1,10 @@
+.header{
+    display: flex;
+    background-color: #FFFFFF;
+    align-items: center;
+    z-index:2 !important;
+    box-shadow: 0px 4px 11px rgba(47, 128, 237, 0.3);
+    &--img{
+        margin:0.5rem 0.5rem;
+    }
+}

@@ -1,0 +1,15 @@
+<div class="signup">
+  <div class="signup--form">
+    <h1>We are happy that you are <span *ngIf="isSignup">here</span><span *ngIf="!isSignup">back</span></h1>
+    <label for="username">Username</label>
+    <input type="text" id="username" [(ngModel)]="username" name="username" placeholder="Enter the Email"/>
+    <label for="password">Password</label>
+    <input id="password" type="text" [(ngModel)]="password" name="password" placeholder="Enter Password"/>
+    <button *ngIf="isSignup" (click)="signup()">Signup</button>
+    <button *ngIf="!isSignup" (click)="signup()">Signin</button>
+  </div>
+  <div class="signup--Img">
+<img src="https://miro.medium.com/max/1400/1*wizxKghALijDX8oiGOgZPA.png" width="600"/>
+
+  </div>
+</div>
