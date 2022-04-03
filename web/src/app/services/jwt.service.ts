@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
@@ -12,7 +13,7 @@ export class JwtService {
   postUser = (user: string) =>{
     return this.http.post(`${this.endpoint}/signup`, user)
   }
-  checkUser = (user: string) =>{
+  checkUser = (user: string): Observable<any> =>{
     return this.http.post(`${this.endpoint}/signin`, user, { withCredentials: true })
     //{ withCredentials: true } most imp thing otherwise token wont be saved at browser check config at server side 
     //a boolean value that indicates whether or not cross-site Access-Control requests should be made using credentials such as cookies, authorization headers or TLS client certificates
