@@ -21,4 +21,9 @@ export class JwtService {
   goHome = () =>{
     return this.http.get(`${this.endpoint}/home`, { withCredentials: true})
   }
+
+  logout = () =>{
+    console.log("...logging out")
+    return this.http.get(`${this.endpoint}/logout`, { withCredentials: true})
+  }
 }

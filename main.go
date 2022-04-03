@@ -36,8 +36,8 @@ func main() {
 
 	//same as handlers above
 	router.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"http://localhost:4200"},
-		AllowHeaders: []string{"http://localhost:4200"},
+		AllowOrigins: []string{"*"},
+		AllowHeaders: []string{"*"},
 		AllowMethods: []string{"POST, GET"},
 		AllowCredentials: true,
 	}))

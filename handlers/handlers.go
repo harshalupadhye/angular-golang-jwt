@@ -38,13 +38,13 @@ var validate = validator.New() //validator has default method to validate
 var Ctxs context.Context //we have initialize it in main.go
 
 func SignupHandler(c *gin.Context) {
-	r := c.Request // r *http.Request 
-	w := c.Writer  // w http.ResponseWriter
-	err := validate.Struct(credentials) //this is to check validation given in the struct in models
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+	r := c.Request                               // r *http.Request
+	w := c.Writer                                // w http.ResponseWriter
+	validatorErr := validate.Struct(credentials) //this is to check validation given in the struct in models
+	if validatorErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": validatorErr.Error()})
 	}
-	err = json.NewDecoder(r.Body).Decode(&credentials)
+	err := json.NewDecoder(r.Body).Decode(&credentials)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest) // thats the way to let user know in network tab
 		return
@@ -59,7 +59,7 @@ func SignupHandler(c *gin.Context) {
 }
 func SiginHandler(c *gin.Context) {
 	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-    c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 	var user bson.M
 	r := c.Request
 	w := c.Writer
@@ -69,7 +69,7 @@ func SiginHandler(c *gin.Context) {
 		return
 	}
 	err = collect.FindOne(Ctxs, bson.M{"username": credentials.Username}).Decode(&user) //checking the user name comming in the body to see if user exists in database and if found the push the found data from database to user var of type bson.M
-	fmt.Println(user)
+	fmt.Println("no user", user)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 	} else {
@@ -100,8 +100,8 @@ func SiginHandler(c *gin.Context) {
 			// 		Secure:   true,                  //if you set above to none that means we have to make this true and do csrf code as well
 			// 	},
 			// )
-			c.SetSameSite(http.SameSiteNoneMode)
-			c.SetCookie("token", tokenString, 5*60, "/", "localhost", true, false)
+			c.SetSameSite(http.SameSiteNoneMode)                                   //tells program that client is on diffrent site and server is on diff
+			c.SetCookie("token", tokenString, 5*60, "/", "localhost", true, false) //secure: true for cross site
 		} else {
 			w.WriteHeader(http.StatusUnauthorized) //if not matched say unauthorized
 		}
@@ -111,9 +111,10 @@ func SiginHandler(c *gin.Context) {
 }
 func HomeHandler(c *gin.Context) {
 	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-    c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true") //to read the cookie from request header otherwise wont be able to
 	r := c.Request
 	w := c.Writer
+
 	cookie, err := r.Cookie("token") // same name as per line 88 this is to get the cookie from request
 
 	if err != nil {
@@ -208,5 +209,61 @@ func RefreshHandler(c *gin.Context) {
 			Expires: expirationTime,
 		},
 	)
+
+}
+
+func LogoutHandler(c *gin.Context){
+	fmt.Println("...loging out")
+	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+	r := c.Request
+	w := c.Writer
+
+	cookie, err := r.Cookie("token")
+
+	if err != nil {
+		if err == http.ErrNoCookie { // if cookie is not present in the http request
+			fmt.Println("no cookie")
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	tokenString := cookie.Value
+	fmt.Println("string",tokenString)
+	claims := &models.Claims{}
+
+	token, err := jwt.ParseWithClaims(tokenString, claims , func(t *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if !token.Valid {
+		w.WriteHeader(http.StatusUnauthorized)
+	}
+
+	expirationTime := time.Now() //expiration time for which session lasts
+
+	claims.ExpiresAt = expirationTime.Unix()
+	token = jwt.NewWithClaims(jwt.SigningMethodHS256, claims) //provide hashing method
+
+	tokenString, err = token.SignedString(jwtKey) //convert hashed token into string
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+
+	c.SetSameSite(http.SameSiteNoneMode)
+	c.SetCookie("token", tokenString, 2, "/", "localhost", true, false)
 
 }
