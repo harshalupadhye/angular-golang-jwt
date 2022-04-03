@@ -23,6 +23,9 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     this.jwtService.goHome().subscribe((user: any)=>{
       console.log('user',user)
+      if (user === 'no cookie'){
+         this.router.navigateByUrl('signin')
+      }
       this.username = user
     })
   }

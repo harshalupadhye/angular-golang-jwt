@@ -120,7 +120,8 @@ func HomeHandler(c *gin.Context) {
 	if err != nil {
 		if err == http.ErrNoCookie { // if cookie is not present in the http request
 			fmt.Println("no cookie")
-			w.WriteHeader(http.StatusUnauthorized)
+			// w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode("no cookie")
 			return
 		}
 		w.WriteHeader(http.StatusBadRequest)
